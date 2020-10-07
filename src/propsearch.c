@@ -14,7 +14,7 @@
 
 static inline void
 update_search_propagation_statistics (kissat * solver,
-				      unsigned previous_propagated_level)
+                                      unsigned previous_propagated_level)
 {
   assert (previous_propagated_level <= solver->propagated);
   const unsigned propagated = solver->propagated - previous_propagated_level;
@@ -47,7 +47,7 @@ update_consistently_assigned (kissat * solver)
   if (assigned != solver->consistently_assigned)
     {
       LOG ("updating consistently assigned from %u to %u",
-	   solver->consistently_assigned, assigned);
+           solver->consistently_assigned, assigned);
       solver->consistently_assigned = assigned;
     }
   else

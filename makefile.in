@@ -9,10 +9,11 @@ VPATH=../src:../test
 	$(CC) $(CFLAGS) -c $<
 
 APPSRC=application.c handle.c parse.c witness.c
+APPSRC=application.c handle.c witness.c
 
 LIBSRT=$(sort $(wildcard ../src/*.c))
 LIBSUB=$(subst ../src/,,$(LIBSRT))
-LIBSRC=$(filter-out main.c $(APPSRC),$(LIBSUB))
+LIBSRC=$(filter-out main.c $(APPSRC2),$(LIBSUB))
 
 TSTSRT=$(sort $(wildcard ../test/*.c))
 TSTSUB=$(subst ../test/,,$(TSTSRT))

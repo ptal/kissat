@@ -29,8 +29,8 @@ start_search (kissat * solver)
 
   solver->stable = stable;
   kissat_phase (solver, "search", GET (searches),
-		"initializing %s search after %" PRIu64 " conflicts",
-		(stable ? "stable" : "focus"), CONFLICTS);
+                "initializing %s search after %" PRIu64 " conflicts",
+                (stable ? "stable" : "focus"), CONFLICTS);
 
   kissat_init_averages (solver, &AVERAGES);
 
@@ -55,17 +55,17 @@ start_search (kissat * solver)
     kissat_very_verbose (solver, "starting unlimited search");
   else if (limited->conflicts && !limited->decisions)
     kissat_very_verbose (solver,
-			 "starting search with conflicts limited to %" PRIu64,
-			 limits->conflicts);
+                         "starting search with conflicts limited to %" PRIu64,
+                         limits->conflicts);
   else if (!limited->conflicts && limited->decisions)
     kissat_very_verbose (solver,
-			 "starting search with decisions limited to %" PRIu64,
-			 limits->decisions);
+                         "starting search with decisions limited to %" PRIu64,
+                         limits->decisions);
   else
     kissat_very_verbose (solver,
-			 "starting search with decisions limited to %" PRIu64
-			 " and conflicts limited to %" PRIu64,
-			 limits->decisions, limits->conflicts);
+                         "starting search with decisions limited to %" PRIu64
+                         " and conflicts limited to %" PRIu64,
+                         limits->decisions, limits->conflicts);
   if (stable)
     {
       START (stable);
@@ -138,9 +138,9 @@ conflict_limit_hit (kissat * solver)
   if (solver->limits.conflicts > solver->statistics.conflicts)
     return false;
   kissat_very_verbose (solver, "conflict limit %" PRIu64
-		       " hit after %" PRIu64 " conflicts",
-		       solver->limits.conflicts,
-		       solver->statistics.conflicts);
+                       " hit after %" PRIu64 " conflicts",
+                       solver->limits.conflicts,
+                       solver->statistics.conflicts);
   return true;
 }
 
@@ -152,9 +152,9 @@ decision_limit_hit (kissat * solver)
   if (solver->limits.decisions > solver->statistics.decisions)
     return false;
   kissat_very_verbose (solver, "decision limit %" PRIu64
-		       " hit after %" PRIu64 " decisions",
-		       solver->limits.decisions,
-		       solver->statistics.decisions);
+                       " hit after %" PRIu64 " decisions",
+                       solver->limits.decisions,
+                       solver->statistics.decisions);
   return true;
 }
 
@@ -169,31 +169,31 @@ kissat_search (kissat * solver)
     {
       clause *conflict = kissat_search_propagate (solver);
       if (conflict)
-	res = kissat_analyze (solver, conflict);
+        res = kissat_analyze (solver, conflict);
       else if (solver->iterating)
-	iterate (solver);
+        iterate (solver);
       else if (!solver->unassigned)
-	res = 10;
+        res = 10;
       else if (TERMINATED (11))
-	break;
+        break;
       else if (conflict_limit_hit (solver))
-	break;
+        break;
       else if (kissat_reducing (solver))
-	res = kissat_reduce (solver);
+        res = kissat_reduce (solver);
       else if (kissat_restarting (solver))
-	kissat_restart (solver);
+        kissat_restart (solver);
       else if (kissat_rephasing (solver))
-	kissat_rephase (solver);
+        kissat_rephase (solver);
       else if (kissat_eliminating (solver))
-	res = kissat_eliminate (solver);
+        res = kissat_eliminate (solver);
       else if (kissat_probing (solver))
-	res = kissat_probe (solver);
+        res = kissat_probe (solver);
       else if (!solver->level && solver->unflushed)
-	kissat_flush_trail (solver);
+        kissat_flush_trail (solver);
       else if (decision_limit_hit (solver))
-	break;
+        break;
       else
-	kissat_decide (solver);
+        kissat_decide (solver);
     }
 
   stop_search (solver, res);

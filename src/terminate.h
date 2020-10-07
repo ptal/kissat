@@ -5,12 +5,12 @@
 
 #ifndef QUIET
 void kissat_report_termination (kissat *, int bit, const char *file,
-				long lineno, const char *fun);
+                                long lineno, const char *fun);
 #endif
 
 static inline bool
 kissat_terminated (kissat * solver, int bit,
-		   const char *file, long lineno, const char *fun)
+                   const char *file, long lineno, const char *fun)
 {
   assert (0 <= bit), assert (bit < 32);
 #ifdef COVERAGE

@@ -12,8 +12,8 @@
 
 static bool
 one_literal_on_conflict_level (kissat * solver,
-			       clause * conflict,
-			       unsigned *conflict_level_ptr)
+                               clause * conflict,
+                               unsigned *conflict_level_ptr)
 {
   assert (conflict);
   assert (conflict->size > 1);
@@ -35,16 +35,16 @@ one_literal_on_conflict_level (kissat * solver,
       const unsigned idx = IDX (lit);
       const unsigned level = all_assigned[idx].level;
       if (conflict_level == level)
-	{
-	  if (++literals_on_conflict_level > 1 && level == solver->level)
-	    break;
-	}
+        {
+          if (++literals_on_conflict_level > 1 && level == solver->level)
+            break;
+        }
       else if (conflict_level == INVALID_LEVEL || conflict_level < level)
-	{
-	  forced_lit = lit;
-	  conflict_level = level;
-	  literals_on_conflict_level = 1;
-	}
+        {
+          forced_lit = lit;
+          conflict_level = level;
+          literals_on_conflict_level = 1;
+        }
     }
   assert (conflict_level != INVALID_LEVEL);
   assert (literals_on_conflict_level);
@@ -65,45 +65,45 @@ one_literal_on_conflict_level (kissat * solver,
   if (conflict_level < solver->level)
     {
       LOG ("forced backtracking due to conflict level %u < level %u",
-	   conflict_level, solver->level);
+           conflict_level, solver->level);
       kissat_backtrack (solver, conflict_level);
     }
 
   if (conflict_size > 2)
     {
       for (unsigned i = 0; i < 2; i++)
-	{
-	  const unsigned lit = lits[i];
-	  const unsigned lit_idx = IDX (lit);
-	  unsigned highest_position = i;
-	  unsigned highest_literal = lit;
-	  unsigned highest_level = all_assigned[lit_idx].level;
-	  for (unsigned j = i + 1; j < conflict_size; j++)
-	    {
-	      const unsigned other = lits[j];
-	      const unsigned other_idx = IDX (other);
-	      const unsigned level = all_assigned[other_idx].level;
-	      if (highest_level >= level)
-		continue;
-	      highest_literal = other;
-	      highest_position = j;
-	      highest_level = level;
-	      if (highest_level == conflict_level)
-		break;
-	    }
-	  if (highest_position == i)
-	    continue;
-	  reference ref = INVALID_REF;
-	  if (highest_position > 1)
-	    {
-	      ref = kissat_reference_clause (solver, conflict);
-	      kissat_unwatch_blocking (solver, lit, ref);
-	    }
-	  lits[highest_position] = lit;
-	  lits[i] = highest_literal;
-	  if (highest_position > 1)
-	    kissat_watch_blocking (solver, lits[i], lits[!i], ref);
-	}
+        {
+          const unsigned lit = lits[i];
+          const unsigned lit_idx = IDX (lit);
+          unsigned highest_position = i;
+          unsigned highest_literal = lit;
+          unsigned highest_level = all_assigned[lit_idx].level;
+          for (unsigned j = i + 1; j < conflict_size; j++)
+            {
+              const unsigned other = lits[j];
+              const unsigned other_idx = IDX (other);
+              const unsigned level = all_assigned[other_idx].level;
+              if (highest_level >= level)
+                continue;
+              highest_literal = other;
+              highest_position = j;
+              highest_level = level;
+              if (highest_level == conflict_level)
+                break;
+            }
+          if (highest_position == i)
+            continue;
+          reference ref = INVALID_REF;
+          if (highest_position > 1)
+            {
+              ref = kissat_reference_clause (solver, conflict);
+              kissat_unwatch_blocking (solver, lit, ref);
+            }
+          lits[highest_position] = lit;
+          lits[i] = highest_literal;
+          if (highest_position > 1)
+            kissat_watch_blocking (solver, lits[i], lits[!i], ref);
+        }
     }
 
   if (literals_on_conflict_level > 1)
@@ -131,7 +131,7 @@ one_literal_on_conflict_level (kissat * solver,
 
 static void
 mark_literal_as_analyzed (kissat * solver, assigned * all_assigned,
-			  unsigned lit, const char *type)
+                          unsigned lit, const char *type)
 {
   const unsigned idx = IDX (lit);
   assigned *a = all_assigned + idx;
@@ -160,19 +160,19 @@ analyze_reason_side_literals (kissat * solver)
       assert (a->level > 0);
       assert (a->reason != UNIT);
       if (a->reason == DECISION)
-	continue;
+        continue;
       if (a->binary)
-	mark_literal_as_analyzed (solver, all_assigned, a->reason,
-				  "reason side");
+        mark_literal_as_analyzed (solver, all_assigned, a->reason,
+                                  "reason side");
       else
-	{
-	  assert (a->reason < SIZE_STACK (solver->arena));
-	  clause *c = (clause *) (arena + a->reason);
-	  for (all_literals_in_clause (lit, c))
-	    if (IDX (lit) != idx)
-	      mark_literal_as_analyzed (solver, all_assigned, lit,
-					"reason side");
-	}
+        {
+          assert (a->reason < SIZE_STACK (solver->arena));
+          clause *c = (clause *) (arena + a->reason);
+          for (all_literals_in_clause (lit, c))
+            if (IDX (lit) != idx)
+              mark_literal_as_analyzed (solver, all_assigned, lit,
+                                        "reason side");
+        }
     }
 }
 
@@ -239,29 +239,29 @@ kissat_analyze (kissat * solver, clause * conflict)
       LOGCLS (conflict, "analyzing conflict %" PRIu64, CONFLICTS);
       unsigned conflict_level;
       if (one_literal_on_conflict_level (solver, conflict, &conflict_level))
-	res = 1;
+        res = 1;
       else if (!conflict_level)
-	res = -1;
+        res = -1;
       else if ((conflict = kissat_deduce_first_uip_clause (solver, conflict)))
-	{
-	  reset_markings (solver);
-	  reset_analyze (solver);
-	  reset_levels (solver);
-	  res = 0;
-	}
+        {
+          reset_markings (solver);
+          reset_analyze (solver);
+          reset_levels (solver);
+          res = 0;
+        }
       else
-	{
-	  kissat_minimize_clause (solver);
-	  if (!solver->probing)
-	    analyze_reason_side_literals (solver);
-	  reset_markings (solver);
-	  kissat_learn_clause (solver);
-	  if (!solver->probing)
-	    kissat_bump_variables (solver);
-	  reset_analyze (solver);
-	  reset_levels (solver);
-	  res = 1;
-	}
+        {
+          kissat_minimize_clause (solver);
+          if (!solver->probing)
+            analyze_reason_side_literals (solver);
+          reset_markings (solver);
+          kissat_learn_clause (solver);
+          if (!solver->probing)
+            kissat_bump_variables (solver);
+          reset_analyze (solver);
+          reset_levels (solver);
+          res = 1;
+        }
     }
   while (!res);
   STOP (analyze);

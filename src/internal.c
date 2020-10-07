@@ -159,9 +159,9 @@ kissat_reserve (kissat * solver, int max_var)
 {
   kissat_require_initialized (solver);
   kissat_require (0 <= max_var,
-		  "negative maximum variable argument '%d'", max_var);
+                  "negative maximum variable argument '%d'", max_var);
   kissat_require (max_var <= EXTERNAL_MAX_VAR,
-		  "invalid maximum variable argument '%d'", max_var);
+                  "invalid maximum variable argument '%d'", max_var);
   kissat_increase_size (solver, (unsigned) max_var);
 }
 
@@ -275,61 +275,61 @@ kissat_add (kissat * solver, int elit)
       kissat_require_valid_external_internal (elit);
 #if !defined(NDEBUG) || !defined(NPROOFS) || defined(LOGGING)
       if (checking || logging || proving)
-	PUSH_STACK (solver->original, elit);
+        PUSH_STACK (solver->original, elit);
 #endif
       unsigned ilit = kissat_import_literal (solver, elit);
 
       const mark mark = MARK (ilit);
       if (!mark)
-	{
-	  const value value = kissat_fixed (solver, ilit);
-	  if (value > 0)
-	    {
-	      if (!solver->clause.satisfied)
-		{
-		  LOG ("adding root level satisfied literal %u(%d)@0=1",
-		       ilit, elit);
-		  solver->clause.satisfied = true;
-		}
-	    }
-	  else if (value < 0)
-	    {
-	      LOG ("adding root level falsified literal %u(%d)@0=-1",
-		   ilit, elit);
-	      if (!solver->clause.shrink)
-		{
-		  solver->clause.shrink = true;
-		  LOG ("thus original clause needs shrinking");
-		}
-	    }
-	  else
-	    {
-	      MARK (ilit) = 1;
-	      MARK (NOT (ilit)) = -1;
-	      assert (SIZE_STACK (solver->clause.lits) < UINT_MAX);
-	      PUSH_STACK (solver->clause.lits, ilit);
-	    }
-	}
+        {
+          const value value = kissat_fixed (solver, ilit);
+          if (value > 0)
+            {
+              if (!solver->clause.satisfied)
+                {
+                  LOG ("adding root level satisfied literal %u(%d)@0=1",
+                       ilit, elit);
+                  solver->clause.satisfied = true;
+                }
+            }
+          else if (value < 0)
+            {
+              LOG ("adding root level falsified literal %u(%d)@0=-1",
+                   ilit, elit);
+              if (!solver->clause.shrink)
+                {
+                  solver->clause.shrink = true;
+                  LOG ("thus original clause needs shrinking");
+                }
+            }
+          else
+            {
+              MARK (ilit) = 1;
+              MARK (NOT (ilit)) = -1;
+              assert (SIZE_STACK (solver->clause.lits) < UINT_MAX);
+              PUSH_STACK (solver->clause.lits, ilit);
+            }
+        }
       else if (mark < 0)
-	{
-	  assert (mark < 0);
-	  if (!solver->clause.trivial)
-	    {
-	      LOG ("adding dual literal %u(%d) and %u(%d)",
-		   NOT (ilit), -elit, ilit, elit);
-	      solver->clause.trivial = true;
-	    }
-	}
+        {
+          assert (mark < 0);
+          if (!solver->clause.trivial)
+            {
+              LOG ("adding dual literal %u(%d) and %u(%d)",
+                   NOT (ilit), -elit, ilit, elit);
+              solver->clause.trivial = true;
+            }
+        }
       else
-	{
-	  assert (mark > 0);
-	  LOG ("adding duplicated literal %u(%d)", ilit, elit);
-	  if (!solver->clause.shrink)
-	    {
-	      solver->clause.shrink = true;
-	      LOG ("thus original clause needs shrinking");
-	    }
-	}
+        {
+          assert (mark > 0);
+          LOG ("adding duplicated literal %u(%d)", ilit, elit);
+          if (!solver->clause.shrink)
+            {
+              solver->clause.shrink = true;
+              LOG ("thus original clause needs shrinking");
+            }
+        }
     }
   else
     {
@@ -345,173 +345,173 @@ kissat_add (kissat * solver, int elit)
       assert (isize < (unsigned) INT_MAX);
 
       if (solver->inconsistent)
-	LOG ("inconsistent thus skipping original clause");
+        LOG ("inconsistent thus skipping original clause");
       else if (solver->clause.satisfied)
-	LOG ("skipping satisfied original clause");
+        LOG ("skipping satisfied original clause");
       else if (solver->clause.trivial)
-	LOG ("skipping trivial original clause");
+        LOG ("skipping trivial original clause");
       else
-	{
-	  kissat_activate_literals (solver, isize, ilits);
+        {
+          kissat_activate_literals (solver, isize, ilits);
 
-	  if (!isize)
-	    {
-	      if (solver->clause.shrink)
-		LOG ("all original clause literals root level falsified");
-	      else
-		LOG ("found empty original clause");
+          if (!isize)
+            {
+              if (solver->clause.shrink)
+                LOG ("all original clause literals root level falsified");
+              else
+                LOG ("found empty original clause");
 
-	      if (!solver->inconsistent)
-		{
-		  LOG ("thus solver becomes inconsistent");
-		  solver->inconsistent = true;
-		  CHECK_AND_ADD_EMPTY ();
-		  ADD_EMPTY_TO_PROOF ();
-		}
-	    }
-	  else if (isize == 1)
-	    {
-	      unsigned unit = TOP_STACK (solver->clause.lits);
+              if (!solver->inconsistent)
+                {
+                  LOG ("thus solver becomes inconsistent");
+                  solver->inconsistent = true;
+                  CHECK_AND_ADD_EMPTY ();
+                  ADD_EMPTY_TO_PROOF ();
+                }
+            }
+          else if (isize == 1)
+            {
+              unsigned unit = TOP_STACK (solver->clause.lits);
 
-	      if (solver->clause.shrink)
-		LOGUNARY (unit, "original clause shrinks to");
-	      else
-		LOGUNARY (unit, "found original");
+              if (solver->clause.shrink)
+                LOGUNARY (unit, "original clause shrinks to");
+              else
+                LOGUNARY (unit, "found original");
 
-	      kissat_assign_unit (solver, unit);
+              kissat_assign_unit (solver, unit);
 
-	      if (!solver->level)
-		{
-		  clause *conflict = kissat_search_propagate (solver);
-		  if (conflict)
-		    {
-		      LOG ("propagation of root level unit failed");
-		      solver->inconsistent = true;
-		      CHECK_AND_ADD_EMPTY ();
-		      ADD_EMPTY_TO_PROOF ();
-		    }
-		}
-	    }
-	  else
-	    {
-	      reference res = kissat_new_original_clause (solver);
+              if (!solver->level)
+                {
+                  clause *conflict = kissat_search_propagate (solver);
+                  if (conflict)
+                    {
+                      LOG ("propagation of root level unit failed");
+                      solver->inconsistent = true;
+                      CHECK_AND_ADD_EMPTY ();
+                      ADD_EMPTY_TO_PROOF ();
+                    }
+                }
+            }
+          else
+            {
+              reference res = kissat_new_original_clause (solver);
 
-	      const unsigned a = ilits[0];
-	      const unsigned b = ilits[1];
+              const unsigned a = ilits[0];
+              const unsigned b = ilits[1];
 
-	      const value u = VALUE (a);
-	      const value v = VALUE (b);
+              const value u = VALUE (a);
+              const value v = VALUE (b);
 
-	      const unsigned k = u ? LEVEL (a) : UINT_MAX;
-	      const unsigned l = v ? LEVEL (b) : UINT_MAX;
+              const unsigned k = u ? LEVEL (a) : UINT_MAX;
+              const unsigned l = v ? LEVEL (b) : UINT_MAX;
 
-	      bool assign = false;
+              bool assign = false;
 
-	      if (!u && v < 0)
-		{
-		  LOG ("original clause immediately forcing");
-		  assign = true;
-		}
-	      else if (u < 0 && k == l)
-		{
-		  LOG ("both watches falsified at level @%u", k);
-		  assert (v < 0);
-		  assert (k > 0);
-		  kissat_backtrack (solver, k - 1);
-		}
-	      else if (u < 0)
-		{
-		  LOG ("watches falsified at levels @%u and @%u", k, l);
-		  assert (v < 0);
-		  assert (k > l);
-		  assert (l > 0);
-		  assign = true;
-		}
-	      else if (u > 0 && v < 0)
-		{
-		  LOG ("first watch satisfied at level @%u "
-		       "second falsified at level @%u", k, l);
-		  assert (k <= l);
-		}
-	      else if (!u && v > 0)
-		{
-		  LOG ("first watch unassigned "
-		       "second falsified at level @%u", l);
-		  assign = true;
-		}
-	      else
-		{
-		  assert (!u);
-		  assert (!v);
-		}
+              if (!u && v < 0)
+                {
+                  LOG ("original clause immediately forcing");
+                  assign = true;
+                }
+              else if (u < 0 && k == l)
+                {
+                  LOG ("both watches falsified at level @%u", k);
+                  assert (v < 0);
+                  assert (k > 0);
+                  kissat_backtrack (solver, k - 1);
+                }
+              else if (u < 0)
+                {
+                  LOG ("watches falsified at levels @%u and @%u", k, l);
+                  assert (v < 0);
+                  assert (k > l);
+                  assert (l > 0);
+                  assign = true;
+                }
+              else if (u > 0 && v < 0)
+                {
+                  LOG ("first watch satisfied at level @%u "
+                       "second falsified at level @%u", k, l);
+                  assert (k <= l);
+                }
+              else if (!u && v > 0)
+                {
+                  LOG ("first watch unassigned "
+                       "second falsified at level @%u", l);
+                  assign = true;
+                }
+              else
+                {
+                  assert (!u);
+                  assert (!v);
+                }
 
-	      if (assign)
-		{
-		  assert (solver->level > 0);
+              if (assign)
+                {
+                  assert (solver->level > 0);
 
-		  if (isize == 2)
-		    {
-		      assert (res == INVALID_REF);
-		      kissat_assign_binary (solver, false, a, b);
-		    }
-		  else
-		    {
-		      assert (res != INVALID_REF);
-		      clause *c = kissat_dereference_clause (solver, res);
-		      kissat_assign_reference (solver, a, res, c);
-		    }
-		}
-	    }
-	}
+                  if (isize == 2)
+                    {
+                      assert (res == INVALID_REF);
+                      kissat_assign_binary (solver, false, a, b);
+                    }
+                  else
+                    {
+                      assert (res != INVALID_REF);
+                      clause *c = kissat_dereference_clause (solver, res);
+                      kissat_assign_reference (solver, a, res, c);
+                    }
+                }
+            }
+        }
 
 #if !defined(NDEBUG) || !defined(NPROOFS)
       if (solver->clause.satisfied || solver->clause.trivial)
-	{
+        {
 #ifndef NDEBUG
-	  if (checking > 1)
-	    kissat_remove_checker_external (solver, esize, elits);
+          if (checking > 1)
+            kissat_remove_checker_external (solver, esize, elits);
 #endif
 #ifndef NPROOFS
-	  if (proving)
-	    kissat_delete_external_from_proof (solver, esize, elits);
+          if (proving)
+            kissat_delete_external_from_proof (solver, esize, elits);
 #endif
-	}
+        }
       else if (solver->clause.shrink)
-	{
+        {
 #ifndef NDEBUG
-	  if (checking > 1)
-	    {
-	      kissat_check_and_add_internal (solver, isize, ilits);
-	      kissat_remove_checker_external (solver, esize, elits);
-	    }
+          if (checking > 1)
+            {
+              kissat_check_and_add_internal (solver, isize, ilits);
+              kissat_remove_checker_external (solver, esize, elits);
+            }
 #endif
 #ifndef NPROOFS
-	  if (proving)
-	    {
-	      kissat_add_lits_to_proof (solver, isize, ilits);
-	      kissat_delete_external_from_proof (solver, esize, elits);
-	    }
+          if (proving)
+            {
+              kissat_add_lits_to_proof (solver, isize, ilits);
+              kissat_delete_external_from_proof (solver, esize, elits);
+            }
 #endif
-	}
+        }
 #endif
 
 #if !defined(NDEBUG) || !defined(NPROOFS) || defined(LOGGING)
       if (checking)
-	{
-	  LOGINTS (esize, elits, "saved original");
-	  PUSH_STACK (solver->original, 0);
-	  solver->offset_of_last_original_clause =
-	    SIZE_STACK (solver->original);
-	}
+        {
+          LOGINTS (esize, elits, "saved original");
+          PUSH_STACK (solver->original, 0);
+          solver->offset_of_last_original_clause =
+            SIZE_STACK (solver->original);
+        }
       else if (logging || proving)
-	{
-	  LOGINTS (esize, elits, "reset original");
-	  CLEAR_STACK (solver->original);
-	  solver->offset_of_last_original_clause = 0;
-	}
+        {
+          LOGINTS (esize, elits, "reset original");
+          CLEAR_STACK (solver->original);
+          solver->offset_of_last_original_clause = 0;
+        }
 #endif
       for (all_stack (unsigned, lit, solver->clause.lits))
-	  MARK (lit) = MARK (NOT (lit)) = 0;
+          MARK (lit) = MARK (NOT (lit)) = 0;
 
       CLEAR_STACK (solver->clause.lits);
 
@@ -526,7 +526,7 @@ kissat_solve (kissat * solver)
 {
   kissat_require_initialized (solver);
   kissat_require (EMPTY_STACK (solver->clause.lits),
-		  "incomplete clause (terminating zero not added)");
+                  "incomplete clause (terminating zero not added)");
   kissat_require (!GET (searches), "incremental solving not supported");
   return kissat_search (solver);
 }
@@ -554,7 +554,7 @@ kissat_value (kissat * solver, int elit)
   if (import->eliminated)
     {
       if (!solver->extended && !EMPTY_STACK (solver->extend))
-	kissat_extend (solver);
+        kissat_extend (solver);
       const unsigned eliminated = import->lit;
       tmp = PEEK_STACK (solver->eliminated, eliminated);
     }

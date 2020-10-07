@@ -15,7 +15,7 @@
 #include "frames.h"
 #include "heap.h"
 #include "kissat.h"
-#include "limits.h"
+#include "klimits.h"
 #include "literal.h"
 #include "mode.h"
 #include "options.h"

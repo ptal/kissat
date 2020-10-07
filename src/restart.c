@@ -1,7 +1,7 @@
 #include "backtrack.h"
 #include "decide.h"
 #include "internal.h"
-#include "limits.h"
+#include "klimits.h"
 #include "logging.h"
 #include "print.h"
 #include "reluctant.h"
@@ -42,8 +42,8 @@ kissat_new_focused_restart_limit (kissat * solver)
   delta += kissat_logn (solver->statistics.restarts);
   limits->restart.conflicts = CONFLICTS + delta;
   kissat_extremely_verbose (solver, "next focused restart scheduled at %"
-			    PRIu64 " after %" PRIu64 " conflicts",
-			    limits->restart.conflicts, delta);
+                            PRIu64 " after %" PRIu64 " conflicts",
+                            limits->restart.conflicts, delta);
 }
 
 static unsigned
@@ -59,11 +59,11 @@ reuse_stable_trail (kissat * solver)
       frame *frame = &FRAME (res + 1);
       const unsigned decision_idx = IDX (frame->decision);
       const double decision_idx_score =
-	kissat_get_heap_score (scores, decision_idx);
+        kissat_get_heap_score (scores, decision_idx);
       LOG ("decision variable %u at level %u score %g",
-	   decision_idx, res + 1, decision_idx_score);
+           decision_idx, res + 1, decision_idx_score);
       if (next_idx_score > decision_idx_score)
-	break;
+        break;
       res++;
     }
   return res;
@@ -83,9 +83,9 @@ reuse_focused_trail (kissat * solver)
       const unsigned decision_idx = IDX (frame->decision);
       const unsigned decision_idx_stamp = links[decision_idx].stamp;
       LOG ("decision variable %u at level %u stamp %u",
-	   decision_idx, res + 1, decision_idx_stamp);
+           decision_idx, res + 1, decision_idx_stamp);
       if (next_idx_stamp > decision_idx_stamp)
-	break;
+        break;
       res++;
     }
   return res;
@@ -117,9 +117,9 @@ kissat_restart (kissat * solver)
   INC (restarts);
   unsigned level = reuse_trail (solver);
   kissat_extremely_verbose (solver,
-			    "restarting after %" PRIu64 " conflicts"
-			    " (scheduled at %" PRIu64 ")",
-			    CONFLICTS, solver->limits.restart.conflicts);
+                            "restarting after %" PRIu64 " conflicts"
+                            " (scheduled at %" PRIu64 ")",
+                            CONFLICTS, solver->limits.restart.conflicts);
   LOG ("restarting to level %u", level);
   kissat_backtrack (solver, level);
   if (!solver->stable)

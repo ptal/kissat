@@ -58,10 +58,10 @@ collect_reducibles (kissat * solver, reducibles * reds, reference start_ref)
 #ifdef LOGGING
   if (redundant < solver->first_reducible)
     LOG ("updating redundant clauses start from %zu to %zu",
-	 (size_t) solver->first_reducible, (size_t) redundant);
+         (size_t) solver->first_reducible, (size_t) redundant);
   else
     LOG ("no update to redundant clauses start %zu",
-	 (size_t) solver->first_reducible);
+         (size_t) solver->first_reducible);
 #endif
   solver->first_reducible = redundant;
   const unsigned tier2 = GET_OPTION (tier2);
@@ -72,38 +72,38 @@ collect_reducibles (kissat * solver, reducibles * reds, reference start_ref)
   for (clause * c = start; c != end; c = kissat_next_clause (c))
     {
       if (!c->redundant)
-	continue;
+        continue;
       if (c->garbage)
-	continue;
+        continue;
       if (c->reason)
-	continue;
+        continue;
       if (c->hyper)
-	{
-	  assert (c->size == 3);
-	  if (c->used)
-	    {
+        {
+          assert (c->size == 3);
+          if (c->used)
+            {
 #ifndef QUIET
-	      used_hyper_ternary_clauses++;
+              used_hyper_ternary_clauses++;
 #endif
-	      c->used = false;
-	    }
-	  else
-	    {
+              c->used = false;
+            }
+          else
+            {
 #ifndef QUIET
-	      flushed_hyper_ternary_clauses++;
+              flushed_hyper_ternary_clauses++;
 #endif
-	      kissat_mark_clause_as_garbage (solver, c);
-	    }
-	  continue;
-	}
+              kissat_mark_clause_as_garbage (solver, c);
+            }
+          continue;
+        }
       if (c->keep)
-	continue;
+        continue;
       if (c->used)
-	{
-	  c->used--;
-	  if (c->glue <= tier2)
-	    continue;
-	}
+        {
+          c->used--;
+          if (c->glue <= tier2)
+            continue;
+        }
       assert (!c->garbage);
       assert (kissat_clause_in_arena (solver, c));
       reducible red;
@@ -121,8 +121,8 @@ collect_reducibles (kissat * solver, reducibles * reds, reference start_ref)
     kissat_phase (solver, "reduced", GET (reductions),
       "reduced %zu unused hyper ternary clauses %.0f%% out of %zu",
       flushed_hyper_ternary_clauses,
-	kissat_percent (flushed_hyper_ternary_clauses,
-	                total_hyper_ternary_clauses),
+        kissat_percent (flushed_hyper_ternary_clauses,
+                        total_hyper_ternary_clauses),
       total_hyper_ternary_clauses);
 // *INDENT-ON*
 #endif
@@ -141,7 +141,7 @@ static void
 sort_reducibles (kissat * solver, reducibles * reds)
 {
   RADIX_STACK (RADIX_SORT_REDUCE_LENGTH,
-	       reducible, uint64_t, *reds, USEFULNESS);
+               reducible, uint64_t, *reds, USEFULNESS);
 }
 
 static void
@@ -154,11 +154,11 @@ mark_less_useful_clauses_as_garbage (kissat * solver, reducibles * reds)
   const size_t clauses =
     statistics->clauses_irredundant + statistics->clauses_redundant;
   kissat_phase (solver, "reduce",
-		GET (reductions),
-		"reducing %zu (%.0f%%) out of %zu (%.0f%%) "
-		"reducible clauses",
-		target, kissat_percent (target, size),
-		size, kissat_percent (size, clauses));
+                GET (reductions),
+                "reducing %zu (%.0f%%) out of %zu (%.0f%%) "
+                "reducible clauses",
+                target, kissat_percent (target, size),
+                size, kissat_percent (size, clauses));
 #endif
   unsigned reduced = 0;
   word *arena = BEGIN_STACK (solver->arena);
@@ -210,8 +210,8 @@ kissat_reduce (kissat * solver)
   START (reduce);
   INC (reductions);
   kissat_phase (solver, "reduce", GET (reductions),
-		"reduce limit %" PRIu64 " hit after %" PRIu64
-		" conflicts", solver->limits.reduce.conflicts, CONFLICTS);
+                "reduce limit %" PRIu64 " hit after %" PRIu64
+                " conflicts", solver->limits.reduce.conflicts, CONFLICTS);
   force_restart_before_reduction (solver);
   bool compact = compacting (solver);
   reference start = compact ? 0 : solver->first_reducible;
@@ -222,30 +222,30 @@ kissat_reduce (kissat * solver)
       size_t words_to_sweep = arena_size - start;
       size_t bytes_to_sweep = sizeof (word) * words_to_sweep;
       kissat_phase (solver, "reduce", GET (reductions),
-		    "reducing clauses after offset %zu in arena", start);
+                    "reducing clauses after offset %zu in arena", start);
       kissat_phase (solver, "reduce", GET (reductions),
-		    "sweeping %zu words %s %.0f%%",
-		    words_to_sweep, FORMAT_BYTES (bytes_to_sweep),
-		    kissat_percent (words_to_sweep, arena_size));
+                    "sweeping %zu words %s %.0f%%",
+                    words_to_sweep, FORMAT_BYTES (bytes_to_sweep),
+                    kissat_percent (words_to_sweep, arena_size));
 #endif
       if (kissat_flush_and_mark_reason_clauses (solver, start))
-	{
-	  reducibles reds;
-	  INIT_STACK (reds);
-	  if (collect_reducibles (solver, &reds, start))
-	    {
-	      sort_reducibles (solver, &reds);
-	      mark_less_useful_clauses_as_garbage (solver, &reds);
-	      RELEASE_STACK (reds);
-	      kissat_sparse_collect (solver, compact, start);
-	    }
-	  else if (compact)
-	    kissat_sparse_collect (solver, compact, start);
-	  else
-	    kissat_unmark_reason_clauses (solver, start);
-	}
+        {
+          reducibles reds;
+          INIT_STACK (reds);
+          if (collect_reducibles (solver, &reds, start))
+            {
+              sort_reducibles (solver, &reds);
+              mark_less_useful_clauses_as_garbage (solver, &reds);
+              RELEASE_STACK (reds);
+              kissat_sparse_collect (solver, compact, start);
+            }
+          else if (compact)
+            kissat_sparse_collect (solver, compact, start);
+          else
+            kissat_unmark_reason_clauses (solver, start);
+        }
       else
-	assert (solver->inconsistent);
+        assert (solver->inconsistent);
     }
   else
     kissat_phase (solver, "reduce", GET (reductions), "nothing to reduce");
