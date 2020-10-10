@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
+#include <unistd.h>
 #include "service.h"
 
 service_t init_service(service_kind kind) {
@@ -18,10 +20,18 @@ void free_service(service_t service) {
   free(service.hostname);
 }
 
+char* service_to_endpoint(service_t service, const char* protocol) {
+  assert(service.hostname != NULL /* "`service_to_endpoint` expects a non-NULL hostname"*/);
+  int max_len = strlen(protocol) + strlen(service.hostname) + 20;
+  char* endpoint = malloc(max_len);
+  snprintf(endpoint, max_len, "%s://%s:%d", protocol, service.hostname, service.port);
+  return endpoint;
+}
+
 const char* service_directory(service_kind kind) {
   switch (kind) {
     case SPLIT: return "SPLIT";
-    case SOLVE: return "SOLVE";
+    case GATHER: return "GATHER";
     case SIMPLIFY: return "SIMPLIFY";
     default:
       fprintf(stderr, "[BUG] unsupported service directory.");
@@ -63,6 +73,16 @@ void register_service(char* services_dir, service_t service) {
   }
   free(path);
   fclose(file);
+}
+
+service_t make_and_register_service(char* service_dir, char* hostname, int port, service_kind kind) {
+  service_t service = {
+    .kind = kind,
+    .hostname = strdup(hostname),
+    .port = port
+  };
+  register_service(service_dir, service);
+  return service;
 }
 
 void unregister_service(char* services_dir, service_t service) {
@@ -128,4 +148,22 @@ service_t* read_all_services(char* services_dir, service_kind kind, int* n) {
   }
   closedir(d);
   return services;
+}
+
+service_t find_service_with_timeout(char* service_dir, service_kind kind, int timeout) {
+  service_t service = read_one_service(service_dir, kind);
+  for(int i=0; i < timeout && service.hostname == NULL; ++i) {
+    sleep(1);
+    service = read_one_service(service_dir, kind);
+  }
+  return service;
+}
+
+service_t find_service_or_exit(char* service_dir, service_kind kind) {
+  service_t service = find_service_with_timeout(service_dir, kind, TIMEOUT_SERVICE);
+  if(service.hostname == NULL) {
+    fprintf(stderr, "Could not find a `%s` service.", service_directory(kind));
+    exit(EXIT_FAILURE);
+  }
+  return service;
 }
